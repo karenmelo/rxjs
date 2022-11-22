@@ -45,7 +45,7 @@ import { Observable, Subscriber } from "rxjs";
 export class AppComponent implements OnInit {
   title = "RXJS";
 
-  minhaPromise(name: string): Promise<string> {
+  myPromise(name: string): Promise<string> {
     return new Promise((resolve, reject) => {
       if (name == "Karen") {
         setTimeout(() => {
@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  minhaObservable(name: string): Observable<string> {
+  myObservable(name: string): Observable<string> {
     return new Observable((subscriber) => {
       if (name === "Karen") {
         subscriber.next("Ola, " + name + "!");
@@ -72,24 +72,67 @@ export class AppComponent implements OnInit {
     });
   }
 
+  userObservable(name: string, email: string): Observable<User> {
+    return new Observable((subscriber) => {
+      if (name === "Admin") {
+        let usuario = new User(name, email);
+        setTimeout(() => {
+          subscriber.next(usuario);
+        }, 1000);
+
+        setTimeout(() => {
+          subscriber.next(usuario);
+        }, 2000);
+
+        setTimeout(() => {
+          subscriber.next(usuario);
+        }, 3000);
+
+        setTimeout(() => {
+          subscriber.next(usuario);
+        }, 4000);
+
+        setTimeout(() => {
+          subscriber.complete();
+        }, 5000);
+      } else {
+        subscriber.error("Ops! Deu erro!");
+      }
+    });
+  }
+
   ngOnInit(): void {
-    // this.minhaPromise("Jose")
+    // this.myPromise("Jose")
     //   .then((result) => console.log(result))
     //   .catch((erro) => console.log(erro));
-
-    this.minhaObservable("Karen").subscribe(
-      (result) => console.log(result),
-      (erro) => console.log(erro),
-      () => console.log("FIM")
-    );
-
+    // this.myObservable("Karen").subscribe({
+    //   next: (result) => console.log(result),
+    //   error: (erro) => console.log(erro),
+    //   complete: () => console.log("FIM"),
+    // });
     const observer = {
       next: (valor: any) => console.log("Next: ", valor),
       error: (erro: any) => console.log("Erro: ", erro),
       complete: () => console.log("FIM"),
     };
+    // const obs = this.myObservable("Karens");
+    // obs.subscribe(observer);
 
-    const obs = this.minhaObservable("Karens");
-    obs.subscribe(observer);
+    const obs = this.userObservable("Admin", "admin@admin.com");
+    const subs = obs.subscribe(observer);
+    setTimeout(() => {
+      subs.unsubscribe();
+      console.log("Estado da conexao: " + subs.closed);
+    }, 3500);
   }
+}
+
+export class User {
+  constructor(name: string, email: string) {
+    this.name = name;
+    this.email = email;
+  }
+
+  name: string;
+  email: string;
 }
