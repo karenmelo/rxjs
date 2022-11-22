@@ -1,4 +1,6 @@
+import { ConstantPool } from "@angular/compiler";
 import { Component, OnInit, resolveForwardRef } from "@angular/core";
+import { Observable, Subscriber } from "rxjs";
 
 @Component({
   selector: "app-root",
@@ -50,12 +52,44 @@ export class AppComponent implements OnInit {
           resolve("Seja bem-vindo " + name);
         }, 1000);
       } else {
-        reject("Ops! voce nao e a Karen!");
+        reject("Ops! você não é a Karen!");
+      }
+    });
+  }
+
+  minhaObservable(name: string): Observable<string> {
+    return new Observable((subscriber) => {
+      if (name === "Karen") {
+        subscriber.next("Ola, " + name + "!");
+        subscriber.next("Ola de novo, " + name + "!");
+        setTimeout(() => {
+          subscriber.next("Resposta com delay!");
+        }, 5000);
+        subscriber.complete();
+      } else {
+        subscriber.error("Ops! Deu erro!");
       }
     });
   }
 
   ngOnInit(): void {
-    this.minhaPromise("Karen").then((result) => console.log(result));
+    // this.minhaPromise("Jose")
+    //   .then((result) => console.log(result))
+    //   .catch((erro) => console.log(erro));
+
+    this.minhaObservable("Karen").subscribe(
+      (result) => console.log(result),
+      (erro) => console.log(erro),
+      () => console.log("FIM")
+    );
+
+    const observer = {
+      next: (valor: any) => console.log("Next: ", valor),
+      error: (erro: any) => console.log("Erro: ", erro),
+      complete: () => console.log("FIM"),
+    };
+
+    const obs = this.minhaObservable("Karens");
+    obs.subscribe(observer);
   }
 }
